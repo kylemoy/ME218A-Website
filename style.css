@@ -61,6 +61,10 @@ table {
 }
 
 
+#wrapper {
+	border: 1px solid #c0c0c0;
+	margin: 5px 5px;
+}
 
 #gallery {text-align: center;}
 #gallery p{display: inline;	font-size: small;}
@@ -246,6 +250,39 @@ table {
 	width: 200px;
 }
 #coding_framework_col2 {
+
+	text-align: left;
+
+}
+#tiva_port_connections {
+	margin: auto;
+}
+
+#tiva_port_connections td {
+	vertical-align: top;
+	font-size: 12px;
+	width: 33%;
+}
+
+#tiva_port_connections2  {
+    border-collapse: collapse;
+    margin: auto;
+    margin-top: 10px;
+}
+
+#tiva_port_connections2 td {
+	vertical-align: top;
+	font-size: 11px;
+	width: auto;
+    padding: 2px 5px;
+}
+
+
+#tiva_port_connections_pin {
+	text-align: center;
+}
+
+#tiva_port_connections_usage {
 	text-align: left;
 }
 

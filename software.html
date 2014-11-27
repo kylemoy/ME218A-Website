@@ -77,11 +77,15 @@ tr.file:hover{
 <h1>State Machine</h1>
 <table id="software_table">
 <tr><td id="software_table_column1">
+<div id="wrapper">
 <h2>State Diagram</h2>
 <br><br>
-<img src="state_diagram.png" style="width:100%"/>
+<img src="state_diagram.png" style="width:95%; display: block; margin-left: auto; margin-right: auto "/>
+<br>
+</div>
 </td>
 <td id="software_table_column2">
+<div id="wrapper">
 <h2>Pseudocode</h2>
 <xmp>
 Switch {state} {
@@ -143,7 +147,9 @@ Switch {state} {
 		If post-disarm timer expires,
 			Set current state to Armed and re-arm
 </xmp>
-</td></tr>
+</div>
+</td>
+</tr>
 </table>
 
 
@@ -515,6 +521,61 @@ bool CheckPot(void) {
 	<tr>
 		<td></td>
 		<td><div class="description" id="DCmotors.c">
+			Blah
+		</div></td>
+	</tr>
+
+	<tr class="file" onclick="toggle_visibility('TapeSensor.c');">
+		<td>TapeSensor.h/.c</td>
+		<td>Contains the functions for the tape sensor.</td>
+	</tr>
+	<tr>
+		<td></td>
+		<td><div class="description" id="TapeSensor.c">
+			Blah
+		</div></td>
+	</tr>
+
+	<tr class="file" onclick="toggle_visibility('LEDs.c');">
+		<td>LEDs.h/.c</td>
+		<td>Contains the functions for controlling the LEDs.</td>
+	</tr>
+	<tr>
+		<td></td>
+		<td><div class="description" id="LEDs.c">
+			Blah
+		</div></td>
+	</tr>
+
+	<tr class="file" onclick="toggle_visibility('Audio.c');">
+		<td>Audio.h/.c</td>
+		<td>Contains the functions for controlling the Audio.</td>
+	</tr>
+	<tr>
+		<td></td>
+		<td><div class="description" id="Audio.c">
+			Blah
+		</div></td>
+	</tr>
+
+	<tr class="file" onclick="toggle_visibility('LCD.c');">
+		<td>LCD.h/.c</td>
+		<td>Contains the functions for controlling the LCD.</td>
+	</tr>
+	<tr>
+		<td></td>
+		<td><div class="description" id="LCD.c">
+			Blah
+		</div></td>
+	</tr>
+
+	<tr class="file" onclick="toggle_visibility('Keypad.c');">
+		<td>Keypad.h/.c</td>
+		<td>Contains the functions for controlling the Keypad.</td>
+	</tr>
+	<tr>
+		<td></td>
+		<td><div class="description" id="Keypad.c">
 			Blah
 		</div></td>
 	</tr>
