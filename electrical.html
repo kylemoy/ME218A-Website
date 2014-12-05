@@ -21,7 +21,7 @@ var elements = document.getElementsByClassName('description');
 n = elements.length;
 for (var i = 0; i < n; i++) {
 	var e = elements[i];
-	e.style.display = 'none';
+	e.style.display = 'block';
 }
 }
 
@@ -89,13 +89,13 @@ h2.subsystem:hover{
 		<td></td>
 		<td>GND</td>
 		<td>PF2</td>
-		<td></td>
+		<td bgcolor="YellowGreen">Audio FX Sound Board</td>
 	</tr>
 	<tr>
 		<td bgcolor="Orchid ">Slot Sensor</td>
 		<td>PB2</td>
 		<td>PF3</td>
-		<td></td>
+		<td bgcolor="YellowGreen">Audio FX Sound Board</td>
 	</tr>
 	<tr>
 		<td></td>
@@ -125,7 +125,7 @@ h2.subsystem:hover{
 		<td bgcolor="CornflowerBlue ">Flag Servo</td>
 		<td>PB6</td>
 		<td>PC7</td>
-		<td></td>
+		<td bgcolor="YellowGreen">Audio FX Sound Board</td>
 	</tr>
 	<tr>
 		<td bgcolor="LightGreen">LED Shift Register Rclk</td>
@@ -137,13 +137,13 @@ h2.subsystem:hover{
 		<td bgcolor="LightGreen">LED Shift Register Sclk</td>
 		<td>PA3</td>
 		<td>PD7</td>
-		<td></td>
+		<td bgcolor="DarkOrchid">Tape Sensor</td>
 	</tr>
 	<tr>
 		<td bgcolor="LightGreen">LED Shift Register Data</td>
 		<td>PA2</td>
 		<td>PF4</td>
-		<td bgcolor="DarkOrchid">Tape Sensor</td>
+		<td></td>
 	</tr>
 </table>
 
@@ -231,37 +231,252 @@ h2.subsystem:hover{
 <div id="wrapper">
 <h2 class="subsystem" onclick="toggle_visibility('Sound');">Sound</h2>
 <div class="description" id="Sound">
-<p><font color="red">[Insert overview of sound subsystem]</font></p>
+<h3>Hacking an MP3 Player</h3>
+<p>In order to give a voice to our project, we experimented hacking an off-the-shelf MP3 player. Each of the pause/play, forward, and back buttons on the MP3 player were removed and replaced with a pair of wires. Interestingly, we found that the voltage difference between the two terminals of the buttons was essentially zero, making it impossible to use a transistor to trigger the button actions. We experimented tying the button terminals to the drain and source of a MOSFET and then pulling the gate voltage high, but without a sufficient drain-to-source voltage, we were not able to get the transistor to conduct any current. When we tied the drain to 5V during further experimentation, the MP3 player stopped responding. As this was our third MP3 player (having had trouble de-soldering surface mount components, accidentally applying too much heat to the display, and causing difficult-to-find shorts), we decided to move on to another method of implementing audio output.</p>
+	<div id="captioned-image" style="float:bottom">
+	<img src="electrical/mp3.jpg" height="300px"/>
+	<img src="electrical/mp3-2.jpg" height="300px"/><br>
+	</div>
+
+<p>Pseudocode for initialization of MP3 Player:</p>
+<div style="margin-left:100px">
+<xmp>
+InitAudioController
+	Turn on mp3 player
+	Wait about 3 seconds
+	Press play/pause button
+	Wait 500ms
+	Press play/pause button
+	Press forward button
+	Wait 500ms
+	Press back button
+	Wait 500ms
+</xmp>
+</div>
+<br>
+<h3>Hacking Apple Audio</h3>
+<p>The second attempt at adding audio functionality came from hacking the audio port of an iPhone 5. The Apple audio port responds to pause/play and forward or backward commands from Apple earbuds, and we thought this would be interesting to hack. </p>
+<p>On the Apple earbuds, a single button controls the audio commands. One pulse of the button gives a pause/play command, two pulses give a forward command, and three pulses give a back command. The command is communicated through a fourth contact found on Apple audio ports. Common audio ports have only three contacts. We found that whenever the button is pressed, the fourth contact is shorted with the third contact. Additionally, there is a voltage difference of roughly 3V between the fourth and third contacts whenever the button is not active. This allowed for control of the audio commands through a transistor and GPIO port (fourth and third pin contacts at the drain and source, and GPIO at the gate). The required timing for each command was found empirically and is summarized in the drawings below.</p>
+
+	<div id="captioned-image" style="float:bottom">
+	<img src="electrical/mp3.png" height="300px"/><br>
+	</div>
+<p>The required delay between pause, play, forward or back events was found to be roughly 200ms.</p>
+
+<p>Altogether, the timing requirements to trigger audio commands summed to large delays far beyond any other events or services. The audio module worked inside its own test harness. As soon as it was incorporated into the events and services framework, the audio did not behave as expected. Our audio module required such precise timing ratios that the dependence on timers and timeout events resulted in audio pauses that did not come at the right time, audio that played continuously, and generally unpredictable output. After considerable time tweaking our timer delays and pre-set pulse widths without success, we decided to move on to a much simpler solution.</p>
+<br>
+<h3>Using an Adafriuit Audio FX Sound Board</h3>
+<p>Finally, our Adafruit Aduio FX Sound Board arrived, and our team decided to take the easy road with audio. With this baby, one can play up to eleven different tracks, and all that is needed to start a track playing is a low pulse longer than 50ms at the pin that corresponds to the desired track. Three tracks were loaded on this board, and three GPIO ports were used to trigger each of these tracks.</p>
+	<div id="captioned-image" style="float:bottom">
+	<img src="electrical/adafruit.png" height="300px"/><br>
+	</div>
+
+
 </div></div>
 
 <div id="wrapper">
 <h2 class="subsystem" onclick="toggle_visibility('Keypad');">Keypad</h2>
 <div class="description" id="Keypad">
-<p><font color="red">[Insert overview of keypad subsystem]</font></p>
+<p>At one of the stages of our game, we require the user to input a series of numbers in response to a simple prompt. The clearest way to direct the user to do this is to present the user with a keypad. Before achieving the final design for our keypad, we went through two iterations. The first solution we considered involved the use of an off-the-shelf keypad and a 16-key encoder (P/N MM74C922N), configured as shown on the diagram below.</p>
+	<div id="captioned-image" style="float:bottom">
+	<img src="electrical/keypad.png" height="300px"/><br>
+	</div>
+<p>The thinking behind this configurations was as follows:
+Button columns (X1-X4) are internally driven. Button rows (Y1 - Y5) are pulled high by an internal pull-up resistor. Capacitors C1 and C2 can be tuned to desired scan frequency and debounce period, according to the encoder datasheet. The lower C1, the higher the scan rate. The higher C2, the longer the debounce period of the buttons. With C1 = 0.01uF and C2 = 0.1uF, scan rate is 6kHz and debounce time is 1ms.
+Data outputs will be represented in software by a nibble: [A B C D] where A is the LSB. Note: (Pin Y4) is not used and will be left open since it is pulled high internally.</p>
+
+<p>Unfortunately, the key encoder we aimed to use was out of stock on all major distribution sites. We soon found that keypad encoders were hard to find online, and that the next best option would be to do the work of the encoder through software. This involved adding pull-up resistors at the row connections of the keypad, and sequentially pulling the columns low, one at a time, while reading the state of each row. If the state of a row was read as low, then the row number together with the column number that was being pulled low would give us the precise location of the key that was being pressed.</p>
+
+<p>Below is the pseudocode for the KeyPad button press event checker. If any of the keypad buttons are pressed, the module variables PressedRow and PressedCol record the row and column values of the button that was pressed and the function returns true. Otherwise, the function returns false.</p>
+<div style="margin-left:100px">
+<xmp>
+bool KeyPadButtonPress_EventChecker()
+for each column c
+	set all columns High
+	set column c Low
+	for each row r
+		read row r
+		if row r is Low
+			PressedRow = r
+			PressedCol = c
+			return true
+		endif
+	endfor
+endfor
+return false
+</xmp>
+</div>
+<p>After some time, we found that the off-the-shelf keypad we were using did not always pull down voltages low enough for our system to work as expected. Some keypad contacts had large internal resistance due to corrosion (we were using an old keypad from the mechatronics lab). To get around this, we soldered together our own key-pad using twelve push-buttons.</p>
+
+<p>Button debouncing was achieved by starting a timer when a keypad button was pressed and having the timeout event correspond to the keypad button press response.</p>
+
+<p>Keypad Summary:</p>
+
+<table id="electrical_table">
+	<tr>
+		<th width="50%">Problem
+		</td>
+		<th>Solution
+		</td>
+	</tr>
+	<tr>
+		<td>Keypad encoders not in stock.
+		</td>
+		<td>Performed function of encoder through software.
+		</td>
+	</tr>
+	<tr>
+		<td>Old off-the-shelf keypad had poor connections and large internal resistance, possibly due to corrosion.
+		</td>
+		<td>Soldered together twelve push-buttons to create our own keypad.
+		</td>
+	</tr>
+	<tr>
+		<td>Attempted to use internal pull-up resistors on Tiva ports by writing to the GPIO_O_PUR register, but found that internal pull-ups of Tiva do not function in input mode.
+		</td>
+		<td>Hardwired 3.3k resistors at relevant connections on keypad. In our case, we pulled up all rows.
+		</td>
+	</tr>
+	<tr>
+		<td>Button debouncing needed.
+		</td>
+		<td>Used an event timer to implement button debouncing.
+		</td>
+	</tr>
+</table>
+
 </div></div>
 
 <div id="wrapper">
 <h2 class="subsystem" onclick="toggle_visibility('Motors');">Motors</h2>
 <div class="description" id="Motors">
-<p><font color="red">[Insert overview of motors subsystem]</font></p>
+<h3>Visual timer motor</h3>
+<p>The mechanism to indicate time collapse will be a “falling ball” that comes down from the top layer of the leaning tower. A motor will spin a pulley so that the “falling ball” will descend from the tower. By a careful choice of the base resistors and the pulley diameter, the falling time is approximately 60 seconds as instructed. When the tasks are completed or the timer expires, the motor will rewind the pulley to rearm the DDM and the rise time is approximately 30 seconds.</p>
+
+<p>An H bridge circuit shown as below is used to drive the motor. There are originally four input lines to control the on and off as well as the direction of the motor. To save the ports needed on TIVA, we use two inverters for input line 3 and 4 so that we only need two input lines for the timing motor control.
+</p>
+	<div id="captioned-image" style="float:bottom">
+	<img src="electrical/timing-motor-circuit.png" height="400px"/><br>
+	</div>
+<table id="electrical_table">
+	<tr>
+		<th width="20%">Control Line
+		</th>
+		<th width="20%">1
+		</th>
+		<th width="20%">2
+		</th>
+		<th width="20%">3 (2 inverted)
+		</th>
+		<th width="20%">4 (1 inverted)
+		</th>
+	</tr>
+	<tr>
+		<td>Stop
+		</td>
+		<td>High
+		</td>
+		<td>High
+		</td>
+		<td>Low
+		</td>
+		<td>Low
+		</td>
+	</tr>
+	<tr>
+		<td>Unwind
+		</td>
+		<td>Low
+		</td>
+		<td>High
+		</td>
+		<td>Low
+		</td>
+		<td>High
+		</td>
+	</tr>
+	<tr>
+		<td>Rewind
+		</td>
+		<td>High
+		</td>
+		<td>Low
+		</td>
+		<td>High
+		</td>
+		<td>Low
+		</td>
+	</tr>
+</table>
+<br>
+<h3>Analog Dial and Tower Response</h3>
+<p>In the final step of the interaction, the users are supposed to perform an analog input by turning a potentiometer to a certain degree. The tower will lean corresponding to the input value from the potentiometer. The value will range from 0 to 3V, to match the analog reading capabilities of the TIVA. When the task is completed, a green LED located above the potentiometer will light up to show the success.</p>
+	<div id="captioned-image" style="float:bottom">
+	<img src="electrical/pot.png" height="250px"/><br>
+	</div>
+<br>
+<h3>Flag Servo</h3>
+<p>After completion of all three tasks, an Italian flag on the top of the tower will be raised as a final show of triumph. A servo motor will be used to accomplish this. The control is easy: the servo motor is connected to a 5V power supply, ground, and a signal input from the TIVA.</p>
+	<div id="captioned-image" style="float:bottom">
+	<img src="electrical/flag-servo.png" height="200px"/><br>
+	</div>
+
 </div></div>
 
 <div id="wrapper">
 <h2 class="subsystem" onclick="toggle_visibility('LEDs');">LEDs</h2>
 <div class="description" id="LEDs">
-<p><font color="red">[Insert overview of LEDs subsystem]</font></p>
+<h3>Analog Controlled LEDs</h3>
+<p>Like many other projects in 218A, we utilized LEDs. While we limited the number of LEDs (10 to be exact), that was still a lot of LEDS to be controlled, and we needed to do so either in analog or by code.</p>
+<p>For three of the LEDs, we controlled it by the actual circuit. The first stage of our game is to cover three tape sensors to activate the LCD screen. Initially, our plan was to have the LEDs light up when the tape sensor is covered so that the user can know that the sensors were seeing their hands. However, we noticed that code was not necessary to do this, and so we designed the Tape Sensors circuit to include the LEDs (see Tape Sensor circuit).
+</p>
+<p>This way, when the tape sensors were covered, the LEDs are turned on. It was also a great debugging tool for us down the line!</p>
+<br>
+<h3>Shift Register Controlled LEDs</h3>
+<p>We will have seven green LEDs for the six layers of the leaning tower and one for the potentiometer. The LEDs will light up sequentially as the tasks are completed. One LED on the bottom layer will light up when all three tape sensors are covered. One on the second layer will light up when the user enters the correct password on the keyboard. One on the third layer will light up when the key is removed. The LED located near the potentiometer on the board will light up when the potentiometer is turned and the remaining three LEDs on the tower will light up all together to indicate the completion of all tasks.</p>
+
+<p>To reduce the number of pins needed to drive the LEDs, we use the 74HC595 shift register with serial input and parallel and serial outputs. Serial data is applied to the serial input and clocked in via the input clock. Once the 74HC595 is loaded with data, the output latch applies the data to the storage registers to light up the selected LEDs. By using 74HC595, we only need three control pins (output latch, shift clock, and data in) to drive the 7 LEDs. As the anodes of the LEDs are pulled to 5V, the output pin should be written 0 to turn on the corresponding LED.</p>
+
+<p>For green LEDs, we have a voltage drop of 2.2V. We should expect a 2.8V drop across the resistors. To achieve a current of approximately 4mA, we should size our resistors to R=680Ω.</p>
+
+	<div id="captioned-image" style="float:bottom">
+	<img src="electrical/led-circuit.png" height="300px"/><br>
+	</div>
+<p>One could argue that the two shift registers (the LCD and LED one) could have been consolidated. Indeed, doing so would have limited the number of pins needed for both LCD and LEDs combined to just 3 pins – as we could connect the data line from one shift register to the next one and control 16 bits total. However, we decided to use two shift registers instead because then the code could be more easily split up, and therefore be easier to categorize and think about from a modular building perspective. </p>
+<p>Additionally, because the LED shift register was going to be accessed more often, we started by using arrays – given past experience with MatLab and such matrix oriented programming, considering the shift register through matrix element manipulation (i.e. arrays) was much more familiar and simple than bitwise control. Naturally, we found that this was not necessary, and in fact, is a little bit of overkill in terms of data storage capacity. However, it did not give us any problems, and so the structure was kept. </p>
+
 </div></div>
 
 <div id="wrapper">
 <h2 class="subsystem" onclick="toggle_visibility('LCD');">LCD</h2>
 <div class="description" id="LCD">
-<p><font color="red">[Insert overview of LCD subsystem]</font></p>
+<p>For part of our project, we decided to have a LCD screen which will print out three randomly generated passcodes, one of which will be a correct code that leads to unlocking the key. Unfortunately, the LCD requires at least 5 Tiva pins, assuming we operate in the 4 bit mode (1 pin per bit, and a pin for the pulsing). To conserve the number of pins necessary, we decided to use a shift register, which will only require the use of 3 pins (the RCK, SCK, and data pins). Below is a schematic diagram showing how the pins are connected</p>
+
+	<div id="captioned-image" style="float:bottom">
+	<img src="electrical/lcd-circuit.png" height="200px"/><br>
+	</div>
+
 </div></div>
 
 <div id="wrapper">
 <h2 class="subsystem" onclick="toggle_visibility('Tape Sensors');">Tape Sensors</h2>
 <div class="description" id="Tape Sensors">
-<p><font color="red">[Insert overview of tape sensors subsystem]</font></p>
+<p>The Tape sensors are used to detect the first interaction where the three hand-shape holes are supposed to be covered by two users. This is the initial task that will cause the DDM to recognize that a disarmament procedure is starting.</p>
+
+<p>There are three green LEDs located above each tape sensor. The LED will light up when the corresponding tape sensor is covered. All three tape sensor outputs will go into a NAND gate (74HC10N). By designing a circuit as shown below, we reduce the number of TIVA ports to only one. The output line will only be low when all three tape sensors are covered. Additionally, the circuit is much simplified as we found that signal conditioning for the tape sensor output was not necessary.</p>
+
+<p>While the game requires the users to cover three tape sensors, we realized that we could not afford to have three Tiva ports devoted to purely sensing whether the hands there were or not. Upon realizing that we did not necessarily care if zero, one or two sensors were covered, and we only wanted to know if all three were covered or not, we decided to use the NAND gate. This led to only needing to use one Tiva pin to see whether the sensors were covered or not. </p>
+
+<p>The tape sensor circuit, which, when covered turns and LED on, is shown here:</p>
+	<div id="captioned-image" style="float:bottom">
+	<img src="electrical/tape-sensor-circuit1.png" height="600px"/><br>
+	</div>
+
+
+<p>Another tape sensor was used at the key slot, to indicate whether the key was there or not, and its circuit is shown below:</p>
+	<div id="captioned-image" style="float:bottom">
+	<img src="electrical/tape-sensor-circuit.png" height="150px"/><br>
+	</div>
 </div></div>
 
 <div id="footer">

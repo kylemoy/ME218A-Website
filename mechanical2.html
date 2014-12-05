@@ -1,4 +1,3 @@
-
 <!DOCTYPE html PUBLIC "-//W3C/DTD XHTML 1.0 Strict /EN"
 	"http://www.w3.org/TR/xhtml1/DTD/xthml1-strict.dtd">
 <html xmlns="http://www.w3.org/1999/xhtml">
@@ -77,7 +76,7 @@ h2.subsystem:hover{
 <h2 class="subsystem" onclick="toggle_visibility('Tower');">Tower</h2>
 <div class="description" id="Tower">
 	<h3>Overview of dimensions</h3>
-	<p>The construction of the tower began with looking up the dimensions of Italy's Tower of Pisa, and then scaling them down to an appropriate size. Figure 1 below shows a simple diagram which labels the dimensions we thought would be relevant for us to construct a scaled model:</p>
+	<p>The construction of the tower began with looking up actual dimensions of the tower, and then scaling it. Figure 1 below shows a simple diagram which labels the dimensions we thought would be relevant for us to construct a scaled model:</p>
 
 	<div id="captioned-image" style="float:bottom">
 	<img src="mechanical/tower1.png" height="300px"/><br>
@@ -95,13 +94,13 @@ h2.subsystem:hover{
 	<p>**some of the dimensions, such as h1 were not used for the construction of our tower, but were left in the table to foster a sense of appreciation for the original architectural wonder.</p>
 
 	<h3>Material Considerations</h3>
-	<p>Given our tower dimensions, the next step was to decide how to make it. While we considered many material options ranging from Duron to acrylic, we found the “best” to be foam core - it was both light and sturdy. Each layer of the tower had a foam core piece, and were connected to each other via 4 quarter inch dowels. In order to make the tower even lighter, we cut out the middle portion of each layer. This had the additional functionality of allowing us to pass the wires for the LEDs through, and to tape the LED down to each layer.</p>
+	<p>Given our tower dimensions, the next step was to decide how to make it. While we considered many options ranging from Duron to acrylic, we found the “best” to be foam core. Each layer of the tower had a foam core piece, and were connected to each other via 4 quarter inch dowels. In order to make the tower even lighter, we cut out the middle portion of each layer. This had the additional functionality of allowing us to pass the wires for the LEDs through, and to tape the LED down to each layer.</p>
 
 	<h3>Final Tower</h3>
 	<p>Thus, the tower is shown in the CAD rendering as below, in Figure 3.</p>
-<p>All the layers were made in foam core, after discovering that even the thinnest acrylic pieces were too heavy for the motor. The base of the tower was made in Duron, as it sat directly on the motor, and we felt that it could use some extra material strength.</p> 
-<p>The close up view shows how the base of the tower has a small hole in the middle – this is used by the motor that shakes the tower. 
-There are also four small holes in the shape of a rectangle. These holes were used to hold down a DC motor, which worked to raise and lower a ball which would constitute our timing mechanism.</p>
+<p>All the layers were made in foam core, after discovering even the thinnest acrylic pieces were too heavy. The base of the tower in made in Duron, as it sits directly on the motor, and we felt that it could use some extra material strength.</p> 
+<p>The close up view shows how the base of the tower as a small hole in the middle – this is used by the motor that shakes the tower. 
+There are also 4 small holes in the shape of a rectangle. These holes were used to hold down a DC motor, which worked to raise and lower a ball which would constitute our timing mechanism.</p>
 <p>In our final design, the base also carried a pulley, which had string wrapped around it, and the top layer also had a pulley in the middle. They worked with the DC motor to bring the ball up and down.</p>
 	<div id="captioned-image" style="float:bottom">
 	<img src="mechanical/tower2.png" height="300px"/><br>
@@ -118,7 +117,7 @@ There are also four small holes in the shape of a rectangle. These holes were us
 <div id="wrapper">
 <h2 class="subsystem" onclick="toggle_visibility('Game Interface');">Game Interface</h2>
 <div class="description" id="Game Interface">
-<p>Given the limited space, we focused on making the game interface a flat surface, with the tower standing up from it. The first part of the game involves covering three tape sensors. To indicate this to our users, we decided to embed the sensors in a slightly lowered surface that is in the shape of three hands. We thought it would be quite natural for people to place their hands where they saw the shape of hands. </p>
+<p>Given the limited space, we focused on making the game interface a flat surface, with the tower standing up from it. The first part of the game involves covering three tape sensors. To indicate this to our users, we decided to embed the sensors in a slightly lowered surface that is in the shape of three hands. We thought it would be quite natural for people to put their hands where they saw hands. </p>
 <p>We also left a rectangular cut out for the LCD screen and the keypad, and an elliptical cut out for the tower. In addition, there were multiple circular cut outs for the LEDs and the potentiometer knob to stick through.</p>
 <p>The top view of the interface is shown in Figure 4.</p>
 <p>Note that the keypad covering is a separate material, because we wanted to emphasize that the keypad was a separate part, and so we felt that using a completely different material would help to make sure the user noticed it more easily.
@@ -134,7 +133,7 @@ There are also four small holes in the shape of a rectangle. These holes were us
 <h2 class="subsystem" onclick="toggle_visibility('Key');">Key to Disarmament, Key to Success</h2>
 <div class="description" id="Key">
 
-<p>One of the more aesthetic part of our game revolved around the key. Our idea for a big motion was to have a giant key be removed from a giant keyhole. Of course, given that the DDM had to fit within an 18 by 18 by 36 inch volume, the key naturally couldn’t be too large. In the end, our key turned out as shown in Figure 5.</p>
+<p>One of the more aesthetic part of our game revolved around the key. Our idea for a big motion was to have a giant key moved. Of course, given that the DDM had to fit within an 18 by 18 by 36 inch volume, the key naturally couldn’t be too large. In the end, our key turned out as shown in Figure 5.</p>
 	<div id="captioned-image" style="float:bottom">
 	<img src="mechanical/key1.png" height="300px"/><br>
 	<b>Figure 5:</b> The key
@@ -142,14 +141,16 @@ There are also four small holes in the shape of a rectangle. These holes were us
 
 <p>The key itself had a maximum height of nearly 8 inches. So it was rather sizeable.</p>
 <p>We wanted the key to be moved from one location to the next during the game. However, this ran into the problem of how we should “reset” after one user was done, and what a logical way to communicate this motion would be. We decided that if a key rotated, and was unlocked, it would be natural for the user to pull it out, and subsequently replace it in another key-hole. Thus came our idea of having two key holes. This way, we can have a sensor, and the Tiva would respond if there were a change in the sensor state – indicate that the key had moved. </p>
-<p>It was a simple matter to cut out the key-hole, and to paint the circular area around it a separate color to make it very clearly different. But the problem was how to lock the key.</p>
-<p>In order to lock the key, we rotated the disc on which the bottom of the key rested, while leaving the top hole unmoved. That way, when the key was perpendicular to the slit, it could not be removed.</p>
-<p>In the Figure 6 below, we see the internal structure of the game interface. The key sat in a pocket made so that the key could really only be inserted vertically, and this pocket sat atop a circular disc which was turned by means of a servo. The key pockets had small holes on their sides, in which tape sensors were placed to detect the presence or absence of a key. </p>
-<p>In the figure on the left (a) we see that the key could not come out of the slit, but in the right figure (b), the key had been rotated 90 degrees, and so it would be free to be pulled out. Both keyholes move simultaneously to lock or unlock the key.</p>
+<p>It was simple matter to cut out the key-hole, and to paint the circular area around it a separate color to make it very clearly different. But the problem was how to lock the key.</p>
+<p>We overcame this situation by rotating the key in the hole, but leaving the hole unmoved. That way, when the key was perpendicular to the slit, it could not be removed.</p>
+<p>In the Figure 6 below, we see the internal structure of the game interface. The key sits in a pocket made so that the key can really only be inserted vertically, and this pocket sits a top of a circular disc which gets turned by a servo. The key pockets also have a small hole in it, which allows a tape sensor to sit in it, and sense whether the key is there or not. </p>
+<p>In the figure on the left we see that the key could not come out of the slit, but in the right figure, the key had been rotated 90 degrees, and so it is free to be pulled out.</p>
 	<div id="captioned-image" style="float:bottom">
 	<img src="mechanical/key2.png" height="300px"/><br>
 	<b>Figure 6:</b> The keys in locked and unlocked states
 	</div>
+<p>Also, note the other keyhole. In Key2a, the other key is also locked, and in Key2b, the second key hole is also unlocked. They two key holes are perpendicular to each other because we thought that it would be more exciting for the user if there were a bit of rotation in the key orientation. The servo motors are controlled together here, again reducing the number of Tiva pins we need to control.</p>
+<p>In reality, the circular disks with the key-holes were attached to the top interface, but we thought this would be a better way to communicate the idea.</p>
 
 
 </div></div>

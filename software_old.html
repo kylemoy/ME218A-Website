@@ -1,0 +1,664 @@
+<!DOCTYPE html PUBLIC "-//W3C/DTD XHTML 1.0 Strict /EN"
+	"http://www.w3.org/TR/xhtml1/DTD/xthml1-strict.dtd">
+<html xmlns="http://www.w3.org/1999/xhtml">
+<head>
+	<meta name="description" content="me218a">
+	<meta name="keywords" content="me218a">
+
+	<title>ME218A Team 15 Project Page</title>
+	<meta http-equiv="content-type"
+		content="text/html;charset=utf8" />
+	<link type="text/css" rel="stylesheet" href="style.css">
+	<link rel="stylesheet" href="nivo-slider/default.css" type="text/css" media="screen" />
+    <link rel="stylesheet" href="nivo-slider/nivo-slider.css" type="text/css" media="screen" />
+</head>
+
+<script type="text/javascript">
+<!--
+function resettoggle() {
+var elements = document.getElementsByClassName('description');
+n = elements.length;
+for (var i = 0; i < n; i++) {
+	var e = elements[i];
+	e.style.display = 'none';
+}
+}
+
+function toggle_visibility(id) {
+var e = document.getElementById(id);
+if(e.style.display == 'none')
+e.style.display = 'block';
+else
+e.style.display = 'none';
+}
+//-->
+</script>
+<style type="text/css">
+tr.file {
+	valign: top;
+}
+tr.file:hover{
+	text-decoration:underline;
+	cursor:pointer
+}
+.description {
+	text-indent: 25px;
+	font-size: 11px;
+	margin-left: 0px;
+	margin-bottom: 15px;
+	padding: 5px;
+	border-style: dashed;
+	border-color: #cccccc;
+	border-width: 1px;
+}
+</style>
+
+<body onload="resettoggle()"> 
+
+<body> 
+
+<div id="container">
+
+<div id="nav"><ul>
+	<li><a href="index.html">Home</a></li>
+	<li><a href="overview.html">Overview</a></li>
+	<li><a href="mechanical.html">Mechanical</a></li>
+	<li><a href="electrical.html">Electrical</a></li>
+	<li><a href="software.html" class="navon">Software</a></li>
+	<li><a href="bom.html">Bill of Materials</a></li>
+	<li><a href="gems.html">Gems of Wisdom</a></li>
+	<li><a href="aboutus.html">About Us</a></li>
+</ul></div>
+
+<div id="title">
+<img src="title.png" style="float:left"/>
+<img src="stanford.gif" style="float:right"/>
+</div>
+<h1>State Machine</h1>
+<table id="software_table">
+<tr><td id="software_table_column1">
+<div id="wrapper">
+<h2>State Diagram</h2>
+<br><br>
+<img src="state_diagram.png" style="width:95%; display: block; margin-left: auto; margin-right: auto "/>
+<br>
+</div>
+</td>
+<td id="software_table_column2">
+<div id="wrapper">
+<h2>Pseudocode</h2>
+<div id="wrapper2">
+<xmp>
+Switch {state} {
+      	Case Armed:
+		If arming or initializing,
+               		vibration motor on
+      	      		setLED(all low)
+      	      		lower flag
+               		raise the ball and feather
+               		set tower to 0
+		If three hands detected,
+				vibration motor off
+               		setLED(first level on)
+               		start Rearm Timer (60 seconds)
+					begin printing LCD passcode
+               		Audio(success)
+			Set current state to Stage1
+ 
+      	Case Stage1:
+		If Rearm timer expires,
+			Set current state to Armed and re-arm
+               	If one hand or more hands is released,
+			Clear LCD
+			setLED (first level off)
+			Set current state to Stage1Stagnated
+		If correct password is entered into keypad:
+			setLED (second level on)
+			rotate key motors
+			audio (success)
+		If incorrect password is entered into keypad:
+			pulse vibration motor
+ 
+	Case Stage1Stagnated:
+		If Rearm timer expires,
+			Set current state to Armed and re-arm
+		If three hands detected,
+			setLED(first level on)
+			begin printing LCD passcode
+			Set current state to Stage1
+
+      	Case Stage2:
+		If Rearm timer expires,
+			Set current state to Armed and re-arm
+               	If user inserts key into correct slot,
+			setLED(third level on)
+			setLED(dial on)
+			audio(success)
+
+	Case Stage3:
+		If Rearm timer expires,
+			Set current state to Armed and re-arm
+		If pot has been dialed to the correct value,
+			setLED(remaining on, in order)
+			flag raise
+			audio (victory)
+			start Rearm_PostDisarm Timer (30 seconds)
+
+	Case Stage4:
+		If post-disarm timer expires,
+			Set current state to Armed and re-arm
+</xmp>
+</div>
+</div>
+</td>
+</tr>
+</table>
+
+
+<h1>Coding Framework</h1>
+<div id="coding_framework">
+	<table cellspacing="0">
+		<tr>
+			<th id="coding_framework_col1">Filename</th>
+			<th id="coding_framework_col2">Description</th>
+		</tr>
+		<tr class="file" onclick="toggle_visibility('main.c');">
+		<td>main.c</td>
+		<td>Main function to run the framework</td>
+	</tr>
+	<tr>
+		<td></td>
+		<td><div class="description" id="main.c">
+<xmp>
+#include <stdint.h>
+#include <stdbool.h>
+#include <stdio.h>
+#include "inc/hw_types.h"
+#include "inc/hw_memmap.h"
+#include "driverlib/sysctl.h"
+#include "driverlib/gpio.h"
+#include "driverlib/interrupt.h"
+#include "utils/uartstdio.h"
+
+#include "ES_Configure.h"
+#include "ES_Framework.h"
+#include "ES_Port.h"
+#include "termio.h"
+
+#define clrScrn() 	printf("\x1b[2J")
+#define goHome()	printf("\x1b[1,1H")
+#define clrLine()	printf("\x1b[K")
+
+
+int main(void)
+{  
+	// Set the clock to run at 40MhZ using the PLL and 16MHz external crystal
+	SysCtlClockSet(SYSCTL_SYSDIV_5 | SYSCTL_USE_PLL | SYSCTL_OSC_MAIN
+			| SYSCTL_XTAL_16MHZ);
+	TERMIO_Init();
+	clrScrn();
+
+	ES_Return_t ErrorType;
+
+	puts("\rStarting State Machine for Leaning Tower of Pisa \r");
+		printf("%s %s\n",__TIME__, __DATE__);
+	printf("\n\r\n");
+	printf("Press '1' to trigger THREE_HANDS_ON event \n\r");
+	printf("Press '2' to trigger THREE_HANDS_OFF event \n\r");
+	printf("Press '3' to trigger CORRECT_PASSWORD_ENTERED event \n\r");
+	printf("Press '4' to trigger INCORRECT_PASSWORD_ENTERED event \n\r");
+	printf("Press '5' to trigger KEY_INSERTED event \n\r");
+	printf("Press '6' to trigger CORRECT_VALUE_DIALED event \n\r\n\r");
+
+	// Your hardware initialization function calls go here
+
+	// now initialize the Events and Services Framework and start it running
+	ErrorType = ES_Initialize(ES_Timer_RATE_1mS);
+	if ( ErrorType == Success ) {
+
+	  ErrorType = ES_Run();
+
+	}
+	//if we got to here, there was an error
+	switch (ErrorType){
+	  case FailedPost:
+	    printf("Failed on attempt to Post\n");
+	    break;
+	  case FailedPointer:
+	    printf("Failed on NULL pointer\n");
+	    break;
+	  case FailedInit:
+	    printf("Failed Initialization\n");
+	    break;
+	 default:
+	    printf("Other Failure\n");
+	    break;
+	}
+	for(;;)
+	  ;
+
+}
+</xmp>
+		</div></td>
+	</tr>
+	
+	<tr class="file" onclick="toggle_visibility('EventCheckers.c');">
+		<td>EventCheckers.c</td>
+		<td>Contains the event checking functions
+	</tr>
+	<tr>
+		<td></td>
+		<td><div class="description" id="EventCheckers.c">
+<xmp>
+/****************************************************************************
+ Module
+   EventCheckers.c
+
+ Revision
+   1.0.1 
+
+ Description
+   This file contains the event checkers for the Leaning Tower of Pisa
+
+ Notes
+****************************************************************************/
+#include "ES_Configure.h"
+#include "ES_Events.h"
+#include "ES_PostList.h"
+#include "ES_ServiceHeaders.h"
+#include "ES_Port.h"
+
+#include "EventCheckers.h"
+
+#include "TapeSensor.h"
+#include "Servos.h"
+#include "SlotDetector.h"
+#include "DCmotors.h"
+#include "AdafruitAudioService.h"
+
+/****************************************************************************
+ Function
+   Check4Keystroke
+ Parameters
+   None
+ Returns
+   bool: true if a new key was detected & posted
+ Description
+   Takes in a key stroke and responds accordingly - use for debugging and 
+	 module-by-module debugging
+ Notes
+	Input 1 --> emulates the three tape sensors being covered (changes state)
+	Input 2 --> emulates moving to stage1 stagnated
+	Input 3 --> emulates input of correct password
+	Input 4 --> emulates incorrect password
+	Input 5 --> emulates key being reinstered into the right palce
+	Input 6 --> emulates correct pin code entry
+	
+	Input q --> rewinds timing motor
+	Input w --> unwins timing motor
+	Input e --> stops timing motor
+	Input a,s,d --> plays tracks 1, 2, and 3 respectively
+	
+****************************************************************************/
+
+bool Check4Keystroke(void)
+{
+  if ( IsNewKeyReady() )
+  {
+		ES_Event ThisEvent;
+    ThisEvent.EventType = ES_NEW_KEY;
+    ThisEvent.EventParam = GetNewKey();
+		if ( ThisEvent.EventParam == '1'){
+			ThisEvent.EventType = THREE_HANDS_ON;
+      PostDisarmFSM( ThisEvent );
+		} else if ( ThisEvent.EventParam == '2'){
+			ThisEvent.EventType = THREE_HANDS_OFF;
+      PostDisarmFSM( ThisEvent );
+		} else if ( ThisEvent.EventParam == '3'){
+			ThisEvent.EventType = CORRECT_PASSWORD_ENTERED;
+      PostDisarmFSM( ThisEvent );
+		} else if ( ThisEvent.EventParam == '4'){
+			ThisEvent.EventType = INCORRECT_PASSWORD_ENTERED;
+      PostDisarmFSM( ThisEvent );
+		} else if ( ThisEvent.EventParam == '5'){
+			ThisEvent.EventType = KEY_INSERTED ;
+      PostDisarmFSM( ThisEvent );
+		} else if ( ThisEvent.EventParam == '6'){
+			ThisEvent.EventType = CORRECT_VALUE_DIALED ;
+      PostDisarmFSM( ThisEvent );
+		} else if ( ThisEvent.EventParam == 'q'){
+			printf("Rewinding Timing Motor\r\n");
+			rewindTimingMotor();
+		} else if ( ThisEvent.EventParam == 'w'){
+			printf("Unwinding Timing Motor\r\n");
+			unwindTimingMotor();
+		} else if ( ThisEvent.EventParam == 'e'){
+			printf("Stopping Timing Motor\r\n");
+			stopTimingMotor();
+		} else if ( ThisEvent.EventParam == 'a'){
+			printf("Playing Wahooo!\r\n");
+			ES_Event ThisEvent;
+			ThisEvent.EventType = PLAY_TRACK;
+			ThisEvent.EventParam = 1; 					// play track 01
+			PostAdafruitAudioService(ThisEvent);	
+		} else if ( ThisEvent.EventParam == 's'){
+			printf("Playing the pot sound!\r\n");
+			ES_Event ThisEvent;
+			ThisEvent.EventType = PLAY_TRACK;
+			ThisEvent.EventParam = 2; 					// play track 02
+			PostAdafruitAudioService(ThisEvent);	
+		} else if ( ThisEvent.EventParam == 'd'){
+			printf("Playing Success!\r\n");
+			ES_Event ThisEvent;
+			ThisEvent.EventType = PLAY_TRACK;
+			ThisEvent.EventParam = 3; 					// play track 03
+			PostAdafruitAudioService(ThisEvent);	
+		}else   {
+			PostDisarmFSM( ThisEvent );
+		}
+    return true;
+  }
+  return false;
+}
+
+/****************************************************************************
+ Function
+   CheckTapeSensor
+ Parameters
+   None
+ Returns
+   bool: true if all three tape sensors are covered/uncovered
+ Description
+  Responds to the change of state
+ Notes
+	A NAND gate is being used for this circuit, so note that when all three are covered
+	the Tiva sees a LO.
+	
+****************************************************************************/
+
+bool CheckTapeSensor(void) {
+	static bool lastState = true;
+	// lastState == false corresponds to being uncovered
+	// lastState == true corresponds to being covered
+	if (tapeSensorsCovered() && (lastState == false)) {
+		ES_Event ThisEvent;
+    ThisEvent.EventType = THREE_HANDS_ON ;
+    PostDisarmFSM( ThisEvent );
+		lastState = true;
+		return true;
+	} else if (!(tapeSensorsCovered()) && (lastState == true)) {
+		ES_Event ThisEvent;
+    ThisEvent.EventType = THREE_HANDS_OFF ;
+    PostDisarmFSM( ThisEvent );
+		lastState = false;
+		return true;
+	}
+	return false;
+}
+
+/****************************************************************************
+ Function
+   CheckSlotDetector
+ Parameters
+   None
+ Returns
+   bool: true if the key slot detects a change
+ Description
+  Responds to the change of state
+ Notes
+	There is only one tape sensor, so the code will only note if the tape sensor
+	saw a change of state either from covered to uncovered or uncovered to covered
+****************************************************************************/
+
+bool CheckSlotDetector(void) {
+	// wait, according to the SlotDetector code, isn't this always going to happen? whats the point?
+	int keyInSlotDefault = getKeyInSlotDefault();
+	if (keyInSlotDefault == -1) {
+		printf("Setting key in slot default.\r\n");
+		setKeyInSlotDefault();
+	}
+	
+	// lastState == false corresponds to key not being there
+	// lastState == true corresponds to key being there
+	
+	static bool lastState = false;
+	bool keyInSlot = isKeyInSlot();
+
+	if (keyInSlot && (lastState == false)) {
+		printf("Key has been placed.\r\n");
+		lastState = true;
+		ES_Event ThisEvent;
+    ThisEvent.EventType = KEY_INSERTED ;
+    PostDisarmFSM( ThisEvent );
+		return true;
+
+	} else if (!keyInSlot && (lastState == true)) {
+		printf("Key has been removed.\r\n");
+		ES_Event ThisEvent;
+    ThisEvent.EventType = KEY_INSERTED ;
+    PostDisarmFSM( ThisEvent );
+		lastState = false;
+		return true;
+	}
+	return false;
+}
+
+/****************************************************************************
+ Function
+   CheckPot
+ Parameters
+   None
+ Returns
+   bool:
+ Description
+  
+ Notes
+	
+****************************************************************************/
+
+bool CheckPot(void) {
+	static double lastPotValue = -1;
+	double potZero = getPotZero();
+	double potValue = getPotValue();
+	bool victory = getVictory();
+	// If pot has not been initialized yet or if victory has been achieved, do nothing
+	if (potZero == -1 || victory) {
+		return false;
+		// Check victory condition for Game Type A
+	} else if (potZero > 1.5 && (potValue < (potZero - 1.45)) && (potValue > (potZero - 1.55))) {
+		printf("Pot Value: %f\r\n", potValue);
+		printf("Correct Value!\r\n");
+		ES_Event ThisEvent;
+    ThisEvent.EventType = CORRECT_VALUE_DIALED ;
+    PostDisarmFSM( ThisEvent );
+		setVictory(true);
+		return true;
+		// Check victory condition for Game Type B
+	} else if (potZero < 1.5 && (potValue < (potZero + 1.55)) && (potValue > (potZero + 1.45))) {
+		printf("Pot Value: %f\r\n", potValue);
+		printf("Correct Value!\r\n");
+		ES_Event ThisEvent;
+    ThisEvent.EventType = CORRECT_VALUE_DIALED ;
+    PostDisarmFSM( ThisEvent );
+		setVictory(true);
+		return true;
+	// Check for pot changes
+	} else if (potValue < (lastPotValue - 0.05) || potValue > (lastPotValue + 0.05)) {
+		moveTower(potValue);
+		lastPotValue = potValue;
+	}
+	return false;
+	
+}
+</xmp>
+		</div></td>
+	</tr>
+	<tr class="file" onclick="toggle_visibility('DisarmFSM.h');">
+		<td>DisarmFSM.h</td>
+		<td>Contains the main state machine</td>
+	</tr>
+	<tr>
+		<td></td>
+		<td><div class="description" id="DisarmFSM.c">
+			Blah
+		</div></td>
+	</tr>
+
+	<tr class="file" onclick="toggle_visibility('DisarmFSM.c');">
+		<td>DisarmFSM.c</td>
+		<td>Contains the main state machine</td>
+	</tr>
+	<tr>
+		<td></td>
+		<td><div class="description" id="DisarmFSM.c">
+			Blah
+		</div></td>
+	</tr>
+
+	<tr class="file" onclick="toggle_visibility('Servos.c');">
+		<td>Servos.h/.c</td>
+		<td>Contains the functions for driving the tower and key servos.</td>
+	</tr>
+	<tr>
+		<td></td>
+		<td><div class="description" id="Servos.c">
+			Blah
+		</div></td>
+	</tr>
+
+	<tr class="file" onclick="toggle_visibility('DCmotors.c');">
+		<td>DCmotors.h/.c</td>
+		<td>Contains the functions for driving the vibration motor and feather/ball timing motor</td>
+	</tr>
+	<tr>
+		<td></td>
+		<td><div class="description" id="DCmotors.c">
+			Blah
+		</div></td>
+	</tr>
+
+	<tr class="file" onclick="toggle_visibility('TapeSensor.c');">
+		<td>TapeSensor.h/.c</td>
+		<td>Contains the functions for the tape sensor.</td>
+	</tr>
+	<tr>
+		<td></td>
+		<td><div class="description" id="TapeSensor.c">
+<script language="javascript" type="text/javascript" 
+  src="software/TapeSensor.c"></script>
+		</div></td>
+	</tr>
+
+
+	<tr class="file" onclick="toggle_visibility('SlotDetector.c');">
+		<td>SlotDetector.h/.c</td>
+		<td>Contains the functions for the slot detector sensor.</td>
+	</tr>
+	<tr>
+		<td></td>
+		<td><div class="description" id="SlotDetector.c">
+			Blah
+		</div></td>
+	</tr>
+
+	<tr class="file" onclick="toggle_visibility('LEDs.c');">
+		<td>LEDs.h/.c</td>
+		<td>Contains the functions for controlling the LEDs.</td>
+	</tr>
+	<tr>
+		<td></td>
+		<td><div class="description" id="LEDs.c">
+			Blah
+		</div></td>
+	</tr>
+
+	<tr class="file" onclick="toggle_visibility('Audio.c');">
+		<td>Audio.h/.c</td>
+		<td>Contains the functions for controlling the Audio.</td>
+	</tr>
+	<tr>
+		<td></td>
+		<td><div class="description" id="Audio.c">
+			Blah
+		</div></td>
+	</tr>
+
+	<tr class="file" onclick="toggle_visibility('LCD.c');">
+		<td>LCD.h/.c</td>
+		<td>Contains the functions for controlling the LCD.</td>
+	</tr>
+	<tr>
+		<td></td>
+		<td><div class="description" id="LCD.c">
+			Blah
+		</div></td>
+	</tr>
+
+	<tr class="file" onclick="toggle_visibility('KeypadFSM.c');">
+		<td>KeypadFSM.h/.c</td>
+		<td>Contains the functions for controlling the Keypad.</td>
+	</tr>
+	<tr>
+		<td></td>
+		<td><div class="description" id="KeypadFSM.c">
+			Blah
+		</div></td>
+	</tr>
+
+	<tr class="file" onclick="toggle_visibility('passwordGenerator.c');">
+		<td>passwordGenerator.h/.c</td>
+		<td>Contains the functions to generate random passwords and check for correct password.</td>
+	</tr>
+	<tr>
+		<td></td>
+		<td><div class="description" id="passwordGenerator.c">
+			Blah
+		</div></td>
+	</tr>
+
+	<tr class="file" onclick="toggle_visibility('ArmedLine.c');">
+		<td>ArmedLine.h/.c</td>
+		<td>Contains the functions for controlling the +5V armed line.</td>
+	</tr>
+	<tr>
+		<td></td>
+		<td><div class="description" id="ArmedLine.c">
+			Blah
+		</div></td>
+	</tr>
+
+	<tr class="file" onclick="toggle_visibility('helperFunctions.c');">
+		<td>helperFunctions.h/.c</td>
+		<td>Contains helper functions used in various files.</td>
+	</tr>
+	<tr>
+		<td></td>
+		<td><div class="description" id="helperFunctions.c">
+			Blah
+		</div></td>
+	</tr>
+
+</table>
+<br>
+<p>
+View the complete project files:
+<a href="https://github.com/kylemoy/ME218A" target="_blank">Code Repository</a>
+</p>
+</div>
+
+<div id="footer">
+	<a href="http://design.stanford.edu/spdl/" target="_blank">SPDL Home</a>
+</div>
+
+</div>
+
+<script type="text/javascript" src="nivo-slider/jquery-1.7.1.min.js"></script>
+<script type="text/javascript">
+    $(document).ready(function() {
+			$('#tapesensor.c').load("software/TapeSensor.c");
+		});
+    });
+</script>
+
+</body>
+</html>

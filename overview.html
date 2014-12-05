@@ -12,7 +12,47 @@
 	<link rel="stylesheet" href="nivo-slider/default.css" type="text/css" media="screen" />
     <link rel="stylesheet" href="nivo-slider/nivo-slider.css" type="text/css" media="screen" />
 </head>
+<script type="text/javascript">
+<!--
+function resettoggle() {
+var elements = document.getElementsByClassName('description');
+n = elements.length;
+for (var i = 0; i < n; i++) {
+	var e = elements[i];
+	e.style.display = 'block';
+}
+}
 
+function toggle_visibility(id) {
+var e = document.getElementById(id);
+if(e.style.display == 'none')
+e.style.display = 'block';
+else
+e.style.display = 'none';
+}
+//-->
+</script>
+<style type="text/css">
+h2.subsystem {
+	valign: top;
+}
+h2.subsystem:hover{
+	text-decoration:underline;
+	cursor:pointer
+}
+.description {
+	text-indent: 25px;
+	font-size: 15px;
+	padding: 5px;
+}
+
+.video {
+	font-size: 15px;
+	padding: 5px;
+}
+</style>
+
+<body onload="resettoggle()"> 
 <body> 
 
 <div id="container">
@@ -45,6 +85,60 @@
     </td>
   <tr>
 </table>
+
+<div id="wrapper">
+<h2 class="subsystem" onclick="toggle_visibility('Action_Videos');">Action Videos</h2>
+<div class="video" id="Action_Videos">
+<iframe width="560" height="315" src="//www.youtube.com/embed/KDKakXBPWfg" frameborder="0" allowfullscreen></iframe>
+<iframe width="560" height="315" src="//www.youtube.com/embed/HrvhZRvozrw" frameborder="0" allowfullscreen></iframe>
+<br>
+<iframe width="560" height="315" src="//www.youtube.com/embed/WlLe_PzwtnQ" frameborder="0" allowfullscreen></iframe>
+<iframe width="560" height="315" src="//www.youtube.com/embed/ZA5yKDz19K8" frameborder="0" allowfullscreen></iframe>
+</div></div>
+
+<div id="wrapper">
+<h2 class="subsystem" onclick="toggle_visibility('Functional_Description');">Functional Description</h2>
+<div class="description" id="Functional_Description">
+<h3>Size & Self-Containment</h3>
+<p>Our DDM base is an 18” x 18” x 6” box. From this, a 20 inch tower juts out, keeping us well within the 18 by 18 by 36 inch sizing. A single power supply powers the necessary components of the DDM, leading it to be a self-contained entity.</p><br>
+Fear and Panic, & the End of Fear and Panic:</h3>
+When armed, the tower shakes left and right, causing Fear and Panic, as shaking towers are never safe. Once a user begins interacting, the shaking stops until the DDM is armed again – either when the disarmament process isn’t completed in 60 seconds, or 30 seconds after disarmament. </p><br>
+<h3>Timing Mechanism:</h3>
+<p>The first interaction involves covering three tape sensors. As soon as the Tiva senses this event, a ball begins to “drop” from the tower top – the ball and feather that Galileo once dropped, if you will (supposing the feather unfortunately got blown away) – showing passage of time. When the DDM is completely disarmed or 60 seconds elapse, the motor rewinds based on how long the ball had dropped, so it is ready to drop again and show the passage of time to other users.</p><br>
+<h3>Interactions & Feedback:</h3>
+<b>Interaction 1</b>
+<p>The two users come together and cover 3 tape sensors with their hands (no contact necessary). Upon successful covering of the sensors, three LEDS just above the tape sensors light up and an excited Italian exclamation is played. Additionally, the tower’s first tier green LED lights up (see Figure 1).</p><br>
+<div>
+	<div id="captioned-image" style="float:bottom">
+	<img src="overview/Tower.jpg" height="300px"/><br>
+	Figure 1
+	</div>
+<b>Interaction 2 & 2.5</b>
+<p>The tape sensors and game board is set up to suggest that one user puts both hands down, and the other puts his or her right hand down (see Figure 2). Between the two hands of the first user, there is an LCD screen embedded. While the three tape sensors are covered, the LCD screen prints out four possible passcodes. Said user with both hands on either side of the screen can then read the numbers out to the other hero, who can type it in the keypad. If any one of the hands is removed, the LCD screen goes blank. If the passcode was incorrect, the screen reports this, so the reading Hero can tell the typing Hero. Thus, these interactions requires two people, and their coordination, cooperation, and communication. Upon success, the second tier of the tower lights up, and the same Italian excitement is heard.</p><br>
+<b>Interaction 3</b>
+<p>Now, a key in the board suddenly rotates 90°. The intrepid Hero will draw the key much like King Arthur might have drawn Excalibur from his stone. If the Heroes attempted this before, they would know that the key was previously locked. The Hero’s similarity with King Arthur ends here, as they do not find themselves a King or Queen. Rather, they find another key hole. Not knowing what else to do with a giant key, the Heroes will reinsert the key. This is a rather large scale motion considering the modestly sized DDM. At this point, an LED just above a knob will turn on. The third tier of the tower lights up green and the same Italian man’s excitement is heard.
+
+	<div id="captioned-image" style="float:bottom">
+	<img src="overview/HandTopView.jpg" height="300px"/><br>
+	Figure 2: The three hands, with tape sensors embedded, and LCD screen (between the two hands on the right), and the keypad
+	</div>
+</p><br>
+<b>Interaction 4</b>
+<p>Returning to the knob: Like all knobs, it gets turned. The tower then tilts to reflect the knob’s rotation. This is our analog input. Once the user tilts the tower back to its former imperfect beauty, the game is complete, and Hope & Joy is manifested (see below).</p><br>
+<h3>Hope & Joy:</h3>
+<p>The fourth, fifth and sixth tier LED lights up in quick succession. In addition, a little Italian flag will rise (figure 3), and the Italian man, whose excitement provided positive feedback to the Heroes throughout the game, will now speak words of joy and happiness, and welcome them back again. Thus, it is a both visual and auditory manifestation of Hope & Joy. 
+</p>
+<p>In addition, an “Armed Line” which used to be at 5V, will suddenly be at 0V, or ground.</p><br>
+
+	<div id="captioned-image" style="float:bottom">
+	<img src="overview/Flag.jpg" height="300px"/><br>
+	Figure 3: A battered Italian flag rises - slowly, painfully, but surely and defiantly - triumphant above the thwarted efforts of DrEd. The fight to protect what is important was never an elegant nor graceful motion. Nay, though the victors emerge valiant and united in their common righteous crusafe, they will still come off exactly as one would come off coming out of battle - battered, sweaty, and slightly janky. In the same way, the tower was  and is beautiful angled and imperfect. It has been, and always will be the architectural manifestation of that very human struggle of being.
+	</div>
+<h3>Miscellaneous Functionality Notes:</h3>
+<p>The Heroes will probably take about 45 seconds to disarm the DDM, and it is impossible for DrEd to disarm the device himself.</p>
+
+</div></div>
+
 
 <div id="footer">
 	<a href="http://design.stanford.edu/spdl/" target="_blank">SPDL Home</a>
